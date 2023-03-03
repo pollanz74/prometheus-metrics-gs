@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-metrics-gs
+  labels:
+    application: prometheus-metrics-gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: prometheus-metrics-gs
+  template:
+    metadata:
+      labels:
+        application: prometheus-metrics-gs
+        deploymentConfig: prometheus-metrics-gs
+    spec:
+      serviceAccountName: default
+      securityContext:
+        { }
+      containers:
+        - name: prometheus-metrics-gs
+          securityContext:
+            { }
+          image: local/prometheus-metrics-gs
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 1024Mi
